@@ -103,7 +103,7 @@ int eval_move(int pt, int nx, int ny, unsigned *rr)
 		return 2;
 	if ((pt==PT_BIZR||pt==PT_BIZRG)&&(r&0xFF)==PT_FILT)
 		return 2;
-	if (bmap[ny/CELL][nx/CELL]==WL_ALLOWGAS && ptypes[pt].falldown!=0 && pt!=PT_FIRE && pt!=PT_DWFM && pt!=PT_SMKE)
+	if (bmap[ny/CELL][nx/CELL]==WL_ALLOWGAS && ptypes[pt].falldown!=0 && pt!=PT_FIRE && pt!=PT_DWFM && pt!=PT_SMKE && pt!=PT_EMBE)
 		return 0;
 	if (ptypes[pt].falldown!=2 && bmap[ny/CELL][nx/CELL]==WL_ALLOWLIQUID)
 		return 0;
@@ -771,11 +771,16 @@ inline int create_part(int p, int x, int y, int t)//the function for creating a 
 	{
 		parts[i].tmpx = parts[i].x;
 	}
-	/*Testing
+
 	if(t==PT_WOOD){
-		parts[i].life = 150;
+		parts[i].tmp = 150;
 	}
-	End Testing*/
+
+
+		if(t==PT_EMBE){
+		parts[i].life = rand()%300+250;
+		parts[i].tmp = 2;
+	}
 	if (t==PT_WARP) {
 		parts[i].life = rand()%95+70;
 	}
@@ -1546,13 +1551,13 @@ void update_particles_i(pixel *vid, int start, int inc)
 			//printf("parts[%d].type: %d\n", i, parts[i].type);
 
 			//this if is whether or not life goes down automatically.
-			if (parts[i].life && t!=PT_ACID && t!=PT_CFCN && t!=PT_AGAS && t!=PT_LEAF && t!=PT_SUN && t!=PT_ACRN && t!=PT_COAL && t!=PT_WOOD && t!=PT_STKM && t!=PT_STKM2 && t!=PT_FUSE && t!=PT_FUSE2 && t!=PT_CFUS && t!=PT_FSEP && t!=PT_BCOL && t!=PT_GOL && t!=PT_SPNG && t!=PT_DEUT && t!=PT_PRTO && t!=PT_PRTI)
+			if (parts[i].life && t!=PT_ACID  && t!=PT_CFCN && t!=PT_AGAS && t!=PT_LEAF && t!=PT_SUN && t!=PT_ACRN && t!=PT_COAL && t!=PT_WOOD && t!=PT_STKM && t!=PT_STKM2 && t!=PT_FUSE && t!=PT_FUSE2 && t!=PT_CFUS && t!=PT_FSEP && t!=PT_BCOL && t!=PT_GOL && t!=PT_SPNG && t!=PT_DEUT && t!=PT_PRTO && t!=PT_PRTI)
 			{
 				//this if is for stopping life loss when at a certain life value
 				if (!(parts[i].life==10&&(t==PT_SWCH||t==PT_LCRY||t==PT_PCLN||t==PT_HSWC||t==PT_PIVS||t==PT_PUMP)))
 					parts[i].life--;
 				//this if is for stopping death when life hits 0
-				if (parts[i].life<=0 && !(ptypes[t].properties&PROP_CONDUCTS) && t!=PT_SOAP && t!=PT_ARAY && t!=PT_FIRW && t!=PT_SWCH && t!=PT_PCLN && t!=PT_HSWC && t!=PT_PIVS && t!=PT_PUMP && t!=PT_SPRK && t!=PT_LAVA && t!=PT_LCRY && t!=PT_QRTZ && t!=PT_GLOW && t!= PT_FOG && t!=PT_PIPE && t!=PT_FRZW &&!(t==PT_ICEI&&parts[i].ctype==PT_FRZW)&&t!=PT_INST && t!=PT_SHLD1&& t!=PT_SHLD2&& t!=PT_SHLD3&& t!=PT_SHLD4 && t!=PT_SING)
+				if (parts[i].life<=0 && !(ptypes[t].properties&PROP_CONDUCTS) && t!=PT_SOAP && t!=PT_ARAY && t!=PT_FIRW && t!=PT_SWCH && t!=PT_PCLN && t!=PT_HSWC && t!=PT_PIVS && t!=PT_PUMP && t!=PT_SPRK && t!=PT_LAVA && t!=PT_EMBE && t!=PT_LCRY && t!=PT_QRTZ && t!=PT_GLOW && t!= PT_FOG && t!=PT_PIPE && t!=PT_FRZW &&!(t==PT_ICEI&&parts[i].ctype==PT_FRZW)&&t!=PT_INST && t!=PT_SHLD1&& t!=PT_SHLD2&& t!=PT_SHLD3&& t!=PT_SHLD4 && t!=PT_SING)
 				{
 					kill_part(i);
 					continue;
@@ -1773,7 +1778,7 @@ void update_particles_i(pixel *vid, int start, int inc)
 						if (ptypes[t].state==ST_GAS&&ptypes[parts[i].type].state!=ST_GAS)
 							pv[y/CELL][x/CELL] += 0.50f;
 						part_change_type(i,x,y,t);
-						if (t==PT_FIRE||t==PT_PLSM||t==PT_HFLM||t==PT_BFLM||t==PT_DWFM)
+						if (t==PT_FIRE||t==PT_PLSM||t==PT_HFLM||t==PT_BFLM||t==PT_DWFM || t==PT_EMBE)
 							parts[i].life = rand()%50+120;
 						if (t==PT_LAVA) {
 							if (parts[i].ctype==PT_BRMT) parts[i].ctype = PT_BMTL;
@@ -1893,6 +1898,8 @@ void update_particles_i(pixel *vid, int start, int inc)
 				if (t==PT_FIRE)
 					parts[i].life = rand()%50+120;
                 if (t==PT_DWFM)
+					parts[i].life = rand()%50+120;
+                    if (t==PT_EMBE)
 					parts[i].life = rand()%50+120;
 				if (t==PT_NONE) {
 					kill_part(i);

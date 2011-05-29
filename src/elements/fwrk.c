@@ -2,7 +2,8 @@
 
 int update_FWRK(UPDATE_FUNC_ARGS) {
 	int r, rx, ry, np;
-	if ((parts[i].temp>400&&(9+parts[i].temp/40)>rand()%100000&&parts[i].life==0&&!pmap[y-1][x])||parts[i].ctype==PT_DUST)
+	if ((parts[i].temp>400&&(9+parts[i].temp/40)>rand()%50000&&parts[i].life==0&&!pmap[y-1][x])||parts[i].ctype==PT_OIL)
+	if ((pv[y/CELL][x/CELL] += 20 >400&&(9+parts[i].temp/40)>rand()%50000&&parts[i].life==0&&!pmap[y-1][x])||parts[i].ctype==PT_OIL)
 	{
 		np = create_part(-1, x , y-1 , PT_FWRK);
 		if (np!=-1)
@@ -44,6 +45,7 @@ int update_FWRK(UPDATE_FUNC_ARGS) {
 						}
 					}
 				}
+
 		kill_part(i);
 		return 1;
 	}

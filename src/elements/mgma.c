@@ -1,7 +1,8 @@
 #include <element.h>
 
 int update_MGMA(UPDATE_FUNC_ARGS) {
-	int r,rx,ry;
+
+		int r, rx, ry, rt, t = parts[i].type;
     for(rx=-2; rx<3; rx++)
         for(ry=-2; ry<3; ry++)
             if(x+rx>=0 && y+ry>0 &&
@@ -23,9 +24,24 @@ int update_MGMA(UPDATE_FUNC_ARGS) {
                             parts[pmap[y+ry+nny][x+rx+nnx]>>8].temp = parts[i].temp;
                     }
                 }
-                
+
             }
     if (parts[i].temp< R_TEMP + 1500)
         parts[i].temp = R_TEMP + 1500;
+if( t==PT_EMBE && parts[i].life <=1)
+        if(t==PT_EMBE && parts[i].life <=1)
+	{
+		if (parts[i].tmp==3){
+			t = PT_DSTW;
+			part_change_type(i,x,y,t);
+			parts[i].life = 0;
+		}
+			if ( t==PT_EMBE)
+					{
+						parts[i].life = 0;
+						t = parts[i].type = PT_STNE;
+						part_change_type(i,x,y,t);
+					}
+	}
     return 0;
 }

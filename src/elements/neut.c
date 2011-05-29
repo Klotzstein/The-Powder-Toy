@@ -59,24 +59,47 @@ int update_NEUT(UPDATE_FUNC_ARGS) {
 					parts[i].vx *= 0.995;
 					parts[i].vy *= 0.995;
 				}
-				if ((r&0xFF)==PT_PLUT && pressureFactor>(rand()%1000))
+				else if ((r&0xFF)==PT_PLUT  && pressureFactor>(rand()%1600))
 				{
-					if (33>rand()%100)
+					if (66>rand()%100)
 					{
-						create_part(r>>8, x+rx, y+ry, rand()%3 ? PT_LAVA : PT_URAN);
-						parts[r>>8].temp = MAX_TEMP;
-						if (parts[r>>8].type==PT_LAVA) {
-							parts[r>>8].tmp = 100;
-							parts[r>>8].ctype = PT_PLUT;
+						create_part(r>>12, x+rx, y+ry, rand()%120 ? PT_FIRE : PT_URAN && PT_PLUT);
+						parts[r>>12].temp = MAX_TEMP;
+						if (parts[r>>8].type==PT_FIRE) {
+							parts[r>>8].tmp = 200;
+
+							parts[r>>8].ctype = PT_LO2;
+						}
+					}
+		else
+					{
+						create_part(r>>8, x+rx, y+ry, PT_NEUT);
+						create_part(r>>8, x+rx, y+ry, PT_FIRE);
+						parts[r>>8].vx = 0.25f*parts[r>>8].vx + parts[i].vx;
+						parts[r>>8].vy = 0.25f*parts[r>>8].vy + parts[i].vy;
+					}
+
+		   pv[y/CELL][x/CELL] += 5.0f * CFDS; //Used to be 2, some people said nukes weren't powerful enough
+		   	update_PYRO(UPDATE_FUNC_SUBCALL_ARGS);
+                }else if ((r&0xFF)==PT_P236 && pressureFactor>(rand()%700))
+				{
+					if (66>rand()%100)
+					{
+						create_part(r>>12, x+rx, y+ry, rand()%460 ? PT_NCWS : PT_PLUT);
+						parts[r>>12].temp = MAX_TEMP;
+						if (parts[r>>8].type==PT_NCWS) {
+							parts[r>>8].tmp = 200;
+							parts[r>>8].ctype = PT_OIL;
 						}
 					}
 					else
 					{
-						create_part(r>>8, x+rx, y+ry, PT_NEUT);
+						create_part(r>>7, x+rx, y+ry, PT_NEUT);
+						create_part(r>>9, x+rx, y+ry, PT_NCWS);
 						parts[r>>8].vx = 0.25f*parts[r>>8].vx + parts[i].vx;
 						parts[r>>8].vy = 0.25f*parts[r>>8].vy + parts[i].vy;
 					}
-					pv[y/CELL][x/CELL] += 10.0f * CFDS; //Used to be 2, some people said nukes weren't powerful enough
+					pv[y/CELL][x/CELL] += 5.0f * CFDS; //Used to be 2, some people said nukes weren't powerful enough
 					update_PYRO(UPDATE_FUNC_SUBCALL_ARGS);
 				}
 #ifdef SDEUT
@@ -89,16 +112,31 @@ int update_NEUT(UPDATE_FUNC_ARGS) {
                 else if ((r&0xFF)==PT_DEUT && (pressureFactor+1)>(rand()%1000))
                 {
 					create_part(r>>8, x+rx, y+ry, PT_NEUT);
+					create_part(r>>9, x+rx, y+ry, PT_FIRE);
 					parts[r>>8].vx = 0.25f*parts[r>>8].vx + parts[i].vx;
 					parts[r>>8].vy = 0.25f*parts[r>>8].vy + parts[i].vy;
+                    parts[r>>9].vx = 0.25f*parts[r>>9].vx + parts[i].vx;
+					parts[r>>9].vy = 0.25f*parts[r>>9].vy + parts[i].vy;
 					if (parts[r>>8].life>0)
 					{
 						parts[r>>8].life --;
 						parts[r>>8].temp = restrict_flt(parts[r>>8].temp + parts[r>>8].life*17, MIN_TEMP, MAX_TEMP);
 						pv[y/CELL][x/CELL] += 6.0f * CFDS;
 					}
+
+                     if (66>rand()%100)
+					{
+						create_part(r>>9, x+rx, y+ry, rand()%180 ? PT_FIRE : PT_FIRE);
+						parts[r>>9].temp = MAX_TEMP;
+						if (parts[r>>9].type==PT_FIRE) {
+							parts[r>>9].tmp = 100;
+							parts[r>>9].ctype = PT_DEUT;
+						}
+					}
 					else
 						kill_part(r>>8);
+
+
 				}
 #endif
 				else if ((r&0xFF)==PT_GUNP && 15>(rand()%1000))
