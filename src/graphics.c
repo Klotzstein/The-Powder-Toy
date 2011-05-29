@@ -1600,7 +1600,7 @@ void draw_parts(pixel *vid)
                          t!=PT_PHOT && t!=PT_THDR && t!=PT_SMKE &&
                          t!=PT_C02 && t!=PT_LCRY && t!=PT_SWCH &&
                          t!=PT_PCLN && t!=PT_PUMP && t!=PT_HSWC &&
-                         t!=PT_EMBE &&
+                         t!=PT_EMBE && t!=PT_ASH &&
                          t!=PT_MGMA && t!=PT_FILT && t!=PT_O3 && t!=PT_NCWS  )
 				{
 					if (ptypes[parts[i].type].properties&TYPE_LIQUID) //special effects for liquids in fancy mode
@@ -1814,6 +1814,45 @@ void draw_parts(pixel *vid)
 						blendpixel(vid, nx, ny, cr, cg, cb, 255);
 					}
 				}
+
+							else if (t==PT_ASH)
+				{
+					int z = parts[i].tmp - 3;//speckles!
+					if (parts[i].temp>(ptransitions[t].thv-800.0f))//hotglow for quartz
+					{
+						float frequency = 3.1415/(2*ptransitions[t].thv-(ptransitions[t].thv-800.0f));
+						int q = (parts[i].temp>ptransitions[t].thv)?ptransitions[t].thv-(ptransitions[t].thv-800.0f):parts[i].temp-(ptransitions[t].thv-800.0f);
+						cr = sin(frequency*q) * 226 + (z * 16 + PIXR(ptypes[t].pcolors));
+						cg = sin(frequency*q*4.55 +3.14) * 34 + (z * 16 + PIXR(ptypes[t].pcolors));
+						cb = sin(frequency*q*2.22 +3.14) * 64 + (z * 16 + PIXR(ptypes[t].pcolors));
+						if (cr>=255)
+							cr = 255;
+						if (cg>=255)
+							cg = 255;
+						if (cb>=255)
+							cb = 255;
+						if (cr<=0)
+							cr = 0;
+						if (cg<=0)
+							cg = 0;
+						if (cb<=0)
+							cb = 0;
+						blendpixel(vid, nx, ny, cr, cg, cb, 255);
+					}
+					else
+					{
+						cr = z * 16 + PIXR(ptypes[t].pcolors);
+						cg = z * 16 + PIXG(ptypes[t].pcolors);
+						cb = z * 16 + PIXB(ptypes[t].pcolors);
+						cr = cr>255?255:cr;
+						cg = cg>255?255:cg;
+						cb = cb>255?255:cb;
+						blendpixel(vid, nx, ny, cr, cg, cb, 255);
+					}
+				}
+
+
+
 				else if (t==PT_VIRS)
 				{
 				    if (cmode==CM_AWESOME || cmode==CM_PREAWE){
@@ -3063,13 +3102,14 @@ void draw_parts(pixel *vid)
 				else if (t==PT_PLSM)
 				{
 					float ttemp = (float)parts[i].life;
-					int caddress = restrict_flt(restrict_flt(ttemp, 0.0f, 200.0f)*3, 0.0f, (200.0f*3)-3);
-					uint8 R = plasma_data[caddress];
-					uint8 G = plasma_data[caddress+1];
-					uint8 B = plasma_data[caddress+2];
+				int caddress = restrict_flt(restrict_flt(ttemp, 0.0f, 200.0f)*3, 0.0f, (200.0f*3)-3);
+					uint8 R = plasma_data[caddress ];
+					uint8 G = plasma_data[caddress +2];
+					uint8 B = plasma_data[caddress +1];
+
 					if (cmode == CM_FIRE||cmode==CM_BLOB || cmode==CM_FANCY || cmode==CM_AWESOME || cmode==CM_PREAWE)
 					{
-						cr = R/8;
+						cr = R/10;
 						cg = G/8;
 						cb = B/8;
 						x = nx/CELL;
@@ -3083,6 +3123,16 @@ void draw_parts(pixel *vid)
 						cr += fire_r[y][x];
 						if (cr > 255) cr = 255;
 						fire_r[y][x] = cr;
+				        blendpixel(vid, nx, ny, cr, cg, cb, 250);
+					/*	blendpixel(vid, nx+1, ny, cr, cg, cb, 96);
+						blendpixel(vid, nx-1, ny, cr, cg, cb, 96);
+						blendpixel(vid, nx, ny+1, cr, cg, cb, 96);
+						blendpixel(vid, nx, ny-1, cr, cg, cb, 96);
+						blendpixel(vid, nx+1, ny-1, cr, cg, cb, 32);
+						blendpixel(vid, nx-1, ny+1, cr, cg, cb, 32);
+						blendpixel(vid, nx+1, ny+1, cr, cg, cb, 32);
+						blendpixel(vid, nx-1, ny-1, cr, cg, cb, 32);
+						*/
 					}
 					else
 					{
@@ -3266,29 +3316,23 @@ void draw_parts(pixel *vid)
 					if (cmode == CM_FIRE||cmode==CM_BLOB || cmode==CM_FANCY || cmode==CM_AWESOME || cmode==CM_PREAWE)
 					{
 						cr = R/8;
-						cg = G/8;
-						cb = B/8;
+						cg = G/10;
+						cb = B/10;
 						x = nx/CELL;
 						y = ny/CELL;
 						cg += fire_g[y][x];
-						if (cg > 170) cg = 175;
+						if (cg > 140) cg =135;
 						fire_g[y][x] = cg;
 						cb += fire_b[y][x];
-						if (cb > 150) cb = 150;
+						if (cb >40) cb = 40;
 						fire_b[y][x] = cb;
 						cr += fire_r[y][x];
-						if (cr > 255) cr = 255;
+						if (cr > 200) cr = 200;
 						fire_r[y][x] = cr;
-					}
-					else
-					{
-						cr = parts[i].life * 8;
-						cg = parts[i].life * 2;
-						cb = parts[i].life;
-						if (cr>255) cr = 255;
-						if (cg>200) cg = 120;
-						if (cb>0) cb = 120;
-						blendpixel(vid, nx, ny, cr, cg, cb, 100);
+
+
+
+			        blendpixel(vid, nx, ny, cr, cg, cb, 192);
 						blendpixel(vid, nx+1, ny, cr, cg, cb, 96);
 						blendpixel(vid, nx-1, ny, cr, cg, cb, 96);
 						blendpixel(vid, nx, ny+1, cr, cg, cb, 96);
@@ -3296,6 +3340,85 @@ void draw_parts(pixel *vid)
 						blendpixel(vid, nx+1, ny-1, cr, cg, cb, 32);
 						blendpixel(vid, nx-1, ny+1, cr, cg, cb, 32);
 						blendpixel(vid, nx+1, ny+1, cr, cg, cb, 32);
+						blendpixel(vid, nx-1, ny-1, cr, cg, cb, 32);
+
+
+						/*
+						Reserverd for Xplo (explosion element for Explosives)
+
+										cr = R/8;
+						cg = G/8;
+						cb = B/8;
+						x = nx/CELL;
+						y = ny/CELL;
+						cg += fire_g[y][x];
+						if (cg > 192) cg = 192;
+						fire_g[y][x] = cg;
+						cb += fire_b[y][x];
+						if (cb > 50) cb = 50;
+						fire_b[y][x] = cb;
+						cr += fire_r[y][x];
+						if (cr > 255) cr = 255;
+						fire_r[y][x] = cr;
+   					        blendpixel(vid, nx, ny, cr, cg, cb, 192);
+						blendpixel(vid, nx+1, ny, cr, cg, cb, 96);
+						blendpixel(vid, nx-1, ny, cr, cg, cb, 96);
+						blendpixel(vid, nx, ny+1, cr, cg, cb, 96);
+						blendpixel(vid, nx, ny-1, cr, cg, cb, 96);
+						blendpixel(vid, nx+1, ny-1, cr, cg, cb, 32);
+						blendpixel(vid, nx-1, ny+1, cr, cg, cb, 32);
+						blendpixel(vid, nx+1, ny+1, cr, cg, cb, 32);
+						blendpixel(vid, nx-1, ny-1, cr, cg, cb, 32);
+
+
+						*/
+
+
+						/*
+                        Reserverd for Butangas or something like dat
+                        cr = R/8;
+						cg = G/8;
+						cb = B/8;
+						x = nx/CELL;
+						y = ny/CELL;
+						cg += fire_g[y][x];
+						if (cg > 192) cg = 150;
+						fire_g[y][x] = cg;
+						cb += fire_b[y][x];
+						if (cb > 50) cb = 70;
+						fire_b[y][x] = cb;
+						cr += fire_r[y][x];
+						if (cr > 255) cr = 255;
+						fire_r[y][x] = cr;
+            			        blendpixel(vid, nx, ny, cr, cg, cb, 192);
+						blendpixel(vid, nx+1, ny, cr, cg, cb, 96);
+						blendpixel(vid, nx-1, ny, cr, cg, cb, 96);
+						blendpixel(vid, nx, ny+1, cr, cg, cb, 96);
+						blendpixel(vid, nx, ny-1, cr, cg, cb, 96);
+						blendpixel(vid, nx+1, ny-1, cr, cg, cb, 32);
+						blendpixel(vid, nx-1, ny+1, cr, cg, cb, 32);
+						blendpixel(vid, nx+1, ny+1, cr, cg, cb, 32);
+						blendpixel(vid, nx-1, ny-1, cr, cg, cb, 32);
+
+
+						*/
+
+					}
+					else
+					{
+						cr = parts[i].life * 8;
+						cg = parts[i].life * 2;
+						cb = parts[i].life;
+						if (cr>255) cr = 255;
+						if (cg>212) cg = 212;
+						if (cb>0) cb = 0;
+						blendpixel(vid, nx, ny, cr, cg, cb, 100);
+						blendpixel(vid, nx+1, ny, cr, cg, cb, 96);
+
+						blendpixel(vid, nx, ny-1, cr, cg, cb, 96);
+						blendpixel(vid, nx+1, ny-1, cr, cg, cb, 32);
+						blendpixel(vid, nx-1, ny+1, cr, cg, cb, 32);
+
 						blendpixel(vid, nx-1, ny-1, cr, cg, cb, 32);
 
 					}

@@ -773,7 +773,8 @@ inline int create_part(int p, int x, int y, int t)//the function for creating a 
 	}
 
 	if(t==PT_WOOD){
-		parts[i].tmp = 150;
+		parts[i].life = 50;
+		parts[i].tmp = 50;
 	}
 
 
