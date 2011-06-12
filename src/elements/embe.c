@@ -19,7 +19,9 @@ int update_EMBE(UPDATE_FUNC_ARGS) {
                     {
                         if((pmap[y+ry+nny][x+rx+nnx]>>8)>=NPART||pmap[y+ry+nny][x+rx+nnx])
                             continue;
-                        if(create_part(-1,x+rx+nnx,y+ry+nny,PT_FIRE))
+                        if
+                        (create_part(-1,x+rx+nnx,y+ry+nny,PT_FIRE))
+
                          (create_part(-1,x+rx+nnx,y+ry+nny,PT_SMKE));
                             parts[pmap[y+ry+nny][x+rx+nnx]>>8].temp = parts[i].temp;
                     }

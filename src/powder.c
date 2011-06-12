@@ -103,7 +103,7 @@ int eval_move(int pt, int nx, int ny, unsigned *rr)
 		return 2;
 	if ((pt==PT_BIZR||pt==PT_BIZRG)&&(r&0xFF)==PT_FILT)
 		return 2;
-	if (bmap[ny/CELL][nx/CELL]==WL_ALLOWGAS && ptypes[pt].falldown!=0 && pt!=PT_FIRE && pt!=PT_DWFM && pt!=PT_SMKE && pt!=PT_EMBE)
+	if (bmap[ny/CELL][nx/CELL]==WL_ALLOWGAS && ptypes[pt].falldown!=0 && pt!=PT_FIRE && pt!=PT_DWFM && pt!=PT_SMKE && pt!=PT_EMBE && pt!=PT_XPLO)
 		return 0;
 	if (ptypes[pt].falldown!=2 && bmap[ny/CELL][nx/CELL]==WL_ALLOWLIQUID)
 		return 0;
@@ -170,6 +170,8 @@ int try_move(int i, int x, int y, int nx, int ny)
 		if (!legacy_enable && parts[i].type==PT_PHOT && r)//PHOT heat conduction
 		{
 			if ((r & 0xFF) == PT_COAL || (r & 0xFF) == PT_BCOL)
+				parts[r>>8].temp = parts[i].temp;
+                    if ((r & 0xFF) == PT_OIL)
 				parts[r>>8].temp = parts[i].temp;
 
 			if ((r & 0xFF) < PT_NUM && ptypes[r&0xFF].hconduct)
@@ -779,8 +781,8 @@ inline int create_part(int p, int x, int y, int t)//the function for creating a 
 
 
 		if(t==PT_EMBE){
-		parts[i].life = rand()%300+250;
-		parts[i].tmp = 2;
+		parts[i].life = rand()%300+450;
+		parts[i].tmp = rand()%20+12;
 	}
 	if (t==PT_WARP) {
 		parts[i].life = rand()%95+70;
@@ -830,6 +832,10 @@ inline int create_part(int p, int x, int y, int t)//the function for creating a 
 		parts[i].life = 110;
 		parts[i].tmp = 50;
 	}
+    if (t==PT_OIL) {
+		parts[i].life = 1700;
+		parts[i].tmp = 30;
+	}
 	if (t==PT_FRZW)
 		parts[i].life = 100;
 	if (t==PT_PIPE)
@@ -838,6 +844,8 @@ inline int create_part(int p, int x, int y, int t)//the function for creating a 
 		parts[i].life = 110;
 	if (t==PT_FIRE)
 		parts[i].life = rand()%50+120;
+    if (t==PT_XPLO)
+		parts[i].life = rand()%60+110;
     if (t==PT_DWFM)
 		parts[i].life = rand()%50+120;
     if (t==PT_BFLM)
@@ -1552,13 +1560,13 @@ void update_particles_i(pixel *vid, int start, int inc)
 			//printf("parts[%d].type: %d\n", i, parts[i].type);
 
 			//this if is whether or not life goes down automatically.
-			if (parts[i].life && t!=PT_ACID  && t!=PT_CFCN && t!=PT_AGAS && t!=PT_LEAF && t!=PT_SUN && t!=PT_ACRN && t!=PT_COAL && t!=PT_WOOD && t!=PT_STKM && t!=PT_STKM2 && t!=PT_FUSE && t!=PT_FUSE2 && t!=PT_CFUS && t!=PT_FSEP && t!=PT_BCOL && t!=PT_GOL && t!=PT_SPNG && t!=PT_DEUT && t!=PT_PRTO && t!=PT_PRTI)
+			if (parts[i].life && t!=PT_ACID  && t!=PT_CFCN && t!=PT_AGAS && t!=PT_LEAF && t!=PT_SUN && t!=PT_ACRN && t!=PT_COAL && t!=PT_WOOD && t!=PT_STKM && t!=PT_STKM2 && t!=PT_FUSE && t!=PT_FUSE2 && t!=PT_CFUS && t!=PT_FSEP && t!=PT_BCOL && t!=PT_GOL && t!=PT_SPNG && t!=PT_DEUT && t!=PT_PRTO && t!=PT_PRTI && t!=PT_OIL)
 			{
 				//this if is for stopping life loss when at a certain life value
 				if (!(parts[i].life==10&&(t==PT_SWCH||t==PT_LCRY||t==PT_PCLN||t==PT_HSWC||t==PT_PIVS||t==PT_PUMP)))
 					parts[i].life--;
 				//this if is for stopping death when life hits 0
-				if (parts[i].life<=0 && !(ptypes[t].properties&PROP_CONDUCTS) && t!=PT_SOAP && t!=PT_ARAY && t!=PT_FIRW && t!=PT_SWCH && t!=PT_PCLN && t!=PT_HSWC && t!=PT_PIVS && t!=PT_PUMP && t!=PT_SPRK && t!=PT_LAVA && t!=PT_EMBE && t!=PT_LCRY && t!=PT_QRTZ && t!=PT_GLOW && t!= PT_FOG && t!=PT_PIPE && t!=PT_FRZW &&!(t==PT_ICEI&&parts[i].ctype==PT_FRZW)&&t!=PT_INST && t!=PT_SHLD1&& t!=PT_SHLD2&& t!=PT_SHLD3&& t!=PT_SHLD4 && t!=PT_SING)
+				if (parts[i].life<=0 && !(ptypes[t].properties&PROP_CONDUCTS) && t!=PT_SOAP && t!=PT_ARAY && t!=PT_FIRW && t!=PT_SWCH && t!=PT_PCLN && t!=PT_HSWC && t!=PT_PIVS && t!=PT_PUMP && t!=PT_SPRK  &&t!=PT_LAVA && t!=PT_EMBE && t!=PT_LCRY && t!=PT_QRTZ && t!=PT_GLOW && t!= PT_FOG && t!=PT_PIPE && t!=PT_FRZW &&!(t==PT_ICEI&&parts[i].ctype==PT_FRZW)&&t!=PT_INST && t!=PT_SHLD1&& t!=PT_SHLD2&& t!=PT_SHLD3&& t!=PT_SHLD4 && t!=PT_SING)
 				{
 					kill_part(i);
 					continue;
@@ -1577,7 +1585,7 @@ void update_particles_i(pixel *vid, int start, int inc)
 			          (bmap[y/CELL][x/CELL]==WL_DESTROYALL) ||
 			          (bmap[y/CELL][x/CELL]==WL_ALLOWLIQUID && ptypes[t].falldown!=2) ||
 			          (bmap[y/CELL][x/CELL]==WL_ALLOWSOLID && ptypes[t].falldown!=1) ||
-			          (bmap[y/CELL][x/CELL]==WL_ALLOWGAS && ptypes[t].falldown!=0 && parts[i].type!=PT_FIRE && parts[i].type!=PT_SMKE && parts[i].type!=PT_HFLM) ||
+			          (bmap[y/CELL][x/CELL]==WL_ALLOWGAS && ptypes[t].falldown!=0 && parts[i].type!=PT_FIRE && parts[i].type!=PT_SMKE && parts[i].type!=PT_HFLM && parts[i].type!=PT_XPLO) ||
 			          (bmap[y/CELL][x/CELL]==WL_DETECT && (t==PT_METL || t==PT_SPRK)) ||
 			          (bmap[y/CELL][x/CELL]==WL_EWALL && !emap[y/CELL][x/CELL])) && (t!=PT_STKM) && (t!=PT_STKM2)))
 			{
@@ -1779,7 +1787,7 @@ void update_particles_i(pixel *vid, int start, int inc)
 						if (ptypes[t].state==ST_GAS&&ptypes[parts[i].type].state!=ST_GAS)
 							pv[y/CELL][x/CELL] += 0.50f;
 						part_change_type(i,x,y,t);
-						if (t==PT_FIRE||t==PT_PLSM||t==PT_HFLM||t==PT_BFLM||t==PT_DWFM || t==PT_EMBE)
+						if (t==PT_FIRE||t==PT_PLSM||t==PT_HFLM||t==PT_BFLM||t==PT_DWFM || t==PT_EMBE || t==PT_XPLO)
 							parts[i].life = rand()%50+120;
 						if (t==PT_LAVA) {
 							if (parts[i].ctype==PT_BRMT) parts[i].ctype = PT_BMTL;
@@ -1854,8 +1862,8 @@ void update_particles_i(pixel *vid, int start, int inc)
 			if ((ptypes[t].explosive&2) && pv[y/CELL][x/CELL]>2.5f)
 			{
 				parts[i].life = rand()%80+180;
-				parts[i].temp = restrict_flt(ptypes[PT_FIRE].heat + (ptypes[t].flammable/2), MIN_TEMP, MAX_TEMP);
-				t = PT_FIRE;
+				parts[i].temp = restrict_flt(ptypes[PT_XPLO].heat + (ptypes[t].flammable/2), MIN_TEMP, MAX_TEMP);
+				t = PT_XPLO;
 				part_change_type(i,x,y,t);
 				pv[y/CELL][x/CELL] += 0.25f * CFDS;
 			}
@@ -1901,6 +1909,8 @@ void update_particles_i(pixel *vid, int start, int inc)
                 if (t==PT_DWFM)
 					parts[i].life = rand()%50+120;
                     if (t==PT_EMBE)
+					parts[i].life = rand()%50+120;
+                    if (t==PT_XPLO)
 					parts[i].life = rand()%50+120;
 				if (t==PT_NONE) {
 					kill_part(i);
@@ -2057,7 +2067,8 @@ killed:
 					if ((r & 0xFF) == PT_PLNT) parts[i].ctype &= 0x0007C000;
 					if ((r & 0xFF) == PT_PLUT) parts[i].ctype &= 0x001FCE00;
 					if ((r & 0xFF) == PT_URAN) parts[i].ctype &= 0x003FC000;
-
+	                if ((r & 0xFF) == PT_OIL) parts[i].ctype   = 0x00000000;
+	                if ((r & 0xFF) == PT_P236) parts[i].ctype &= 0x001FCE00;
 					if (get_normal_interp(t, parts[i].x, parts[i].y, parts[i].vx, parts[i].vy, &nrx, &nry)) {
 						dp = nrx*parts[i].vx + nry*parts[i].vy;
 						parts[i].vx -= 2.0f*dp*nrx;

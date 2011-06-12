@@ -19,17 +19,11 @@ int update_BCOL(UPDATE_FUNC_ARGS) {
 					continue;
 				if (((r&0xFF)==PT_FIRE || (r&0xFF)==PT_PLSM) && 1>(rand()%500))
 				{
-					if (parts[i].life>100) {
-						parts[i].life = 99;
+					if (parts[i].life>400) {
+						parts[i].life = 399;
 					}
 				}
-				if ((r&0xFF)==PT_LAVA && 1>(rand()%500))
-				{
-					if (parts[r>>8].ctype == PT_IRON) {
-						parts[r>>8].ctype = PT_METL;
-						kill_part(i);
-					}
-				}
+
 			}
 	return 0;
 }

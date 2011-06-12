@@ -79,7 +79,7 @@ int update_GREN(UPDATE_FUNC_ARGS) {
                         create_part(-1,x-1,y-1,PT_IFIL);
                         create_part(-1,x-1,y+1,PT_BRMT);
                         create_part(-1,x+1,y-1,PT_IFIL);
-                        create_part(-1,x,y,PT_BMTL);
+                        create_part(-1,x,y,PT_FSEP);
                         temporaro--;
                     }
                     pv[y/CELL][x/CELL] += 2.0f;

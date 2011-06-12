@@ -9,32 +9,16 @@ int update_THRM(UPDATE_FUNC_ARGS) {
 				r = pmap[y+ry][x+rx];
 				if ((r>>8)>=NPART || !r)
 					continue;
-				if (((r&0xFF)==PT_FIRE || (r&0xFF)==PT_PLSM || (r&0xFF)==PT_EMBE )) // TODO: could this go in update_PYRO?
+				if (((r&0xFF)==PT_FIRE || (r&0xFF)==PT_PLSM || (r&0xFF)==PT_EMBE || (r&0xFF)==PT_XPLO && (parts[i].temp>=(273.15+400.0f)) )) // TODO: could this go in update_PYRO?
 				{
 					if (8>(rand()%800)) {
 						part_change_type(i,x,y,PT_EMBE);
-						parts[i].ctype = PT_BMTL;
-						parts[i].temp = 3500.0f;
-                        parts[i].life =  rand()%95+80;
-						pv[y/CELL][x/CELL] += 5.0f;
-					} else {
-						part_change_type(i,x,y,PT_EMBE);
+						parts[i].ctype = PT_OIL;
+						parts[i].temp = 1000.0f;
+                        parts[i].life =  rand()%155+80;
+						pv[y/CELL][x/CELL] += rand()%1+1;
 
-						parts[i].ctype = PT_THRM;
-						parts[i].temp = 3500.0f;
-						parts[i].tmp = 20;
-						 parts[i].life = rand()%95+80;
-					}
-                   if (8>(rand()%800)) {
-						part_change_type(i,x,y,PT_EMBE);
-						parts[i].ctype = PT_EMBE;
-						parts[i].temp = 99999.0f;
 
-                        parts[i].tmp = 20;
-                        parts[i].life = rand()%95+80;
-						pv[y/CELL][x/CELL] += 5.0f;
-					}
-				}
-			}
+			}	}	}
 	return 0;
 }

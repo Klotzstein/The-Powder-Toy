@@ -57,7 +57,9 @@ static menu_wall mwalls[] =
 #define SC_CRACKER2 12
 #define SC_STICKMAN 10    //
 #define SC_NATURE 11   //
-#define SC_TOTAL 13
+#define SC_TOTAL 14
+//#define SC_PYRO 14
+//#define SC_TOTAL 15
 
 static menu_section msections[] = //doshow does not do anything currently.
 {
@@ -75,6 +77,7 @@ static menu_section msections[] = //doshow does not do anything currently.
     {"\xA4", "Nature", 0, 1},
 	{"\xC8", "Secret", 0, 1},
 	{"\xC8", "Secret", 0, 0},
+//	("\xC8", "PYRO", 0, 1),
 };
 
 static menu_section colorsections[] = //doshow does not do anything currently.
